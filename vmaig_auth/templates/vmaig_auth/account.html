@@ -1,0 +1,154 @@
+<div id="change-account" class="well clearfix" style="height:330pt;">
+    <h1>个人账户</h1>
+
+        <form id="change-account-form" class="form-horizontal" method="post" role="form">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">ID</label>
+            <div class="col-sm-10">
+                <p class="form-control-static">{{ user.id }}</p>
+            </div>
+        </div>
+         <div class="form-group">
+            <label class="col-sm-2 control-label">账户名</label>
+            <div class="col-sm-10">
+                <p class="form-control-static">{{ user.username }}</p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">Email</label>
+            <div class="col-sm-10">
+                <p class="form-control-static">{{ user.email }}</p>
+            </div>
+        </div>
+            <div class="form-group">
+                <label for="usertel" class="col-sm-2 control-label">电话</label>
+                <div class="col-sm-6">
+                    <input type="text" class="form-control" id="usertel"
+                           placeholder={{ user.usertel }} style="width: 90pt">
+                </div>
+            </div>
+
+            <div class="form-group">
+            <label for="useraddr" class="col-sm-2 control-label">地址</label>
+            <div class="col-sm-6">
+                <input type="text" class="form-control" id="useraddr"
+                    placeholder={{ user.useraddr }}>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">账户余额</label>
+            <div class="col-sm-10">
+                <p class="form-control-static">{{ user.useracnt }}元</p>
+            </div>
+        </div>
+
+        <button id="change-account-button" type="submit" class="btn btn-primary pull-right">
+                确定
+        </button>
+    </form>
+    <div id="usertelval" hidden>{{user.usertel}}</div>
+    <div id="useraddrval" hidden>{{user.useraddr}}</div>
+
+              
+</div>
+
+
+<script language="javascript" type="text/javascript">
+
+    var usertelval='';
+    var useraddrval='';
+
+    $('#change-account-form').submit(function(){
+
+            usertelval = $("#usertel").val();
+            useraddrval = $("#useraddr").val();
+
+            if (usertelval == ""){
+                usertelval = $("#usertelval").text();
+            }
+            if (useraddrval == ""){
+                useraddrval = $("#useraddrval").text();
+            }
+        $.ajax({
+            type:"POST",
+            url:"/usercontrol/account",
+            data:{"useraddr":useraddrval,"usertel":usertelval, },
+            dataType:'json',
+            beforeSend:function(xhr){
+                xhr.setRequestHeader("X-CSRFToken", $.cookie('csrftoken'));
+            },
+            success:function(data,textStatus){
+                var errors = data["errors"];
+                if(errors.length==0){
+                    location.replace("/account");
+                }
+                else{
+                    var html = "<div class=\"alert alert-danger\">"
+                    for (var key in errors){
+                        html += errors[key]+"<br/>";
+                    }
+                    html += "</div>";
+                    $("#change-account .underline").after(html);
+                }
+
+            },
+            error:function(XMLHttpRequest, textStatus, errorThrown){
+                alert(XMLHttpRequest.responseText);
+            }
+
+        });
+        return false;
+    });
+
+    $("#change-account-form").click(function(){
+        $("#change-account .alert").remove();
+    });
+
+
+</script>
+
+
+
+{##}
+{##}
+{#<script language="javascript" type="text/javascript">#}
+{#   $('#change-account-button').submit(function(){#}
+{#        alert('1')#}
+{#        $.ajax({#}
+{#            type:"POST",#}
+{#            url:"/usercontrol/account",#}
+{#            data:{"useraddr":$("#old-addr").val(),"usertel":$("#old-tel").val(),#}
+{#                  "userbday":$("#old-bday").val(),},#}
+{#            dataType:'json',#}
+{#            beforeSend:function(xhr){#}
+{#                xhr.setRequestHeader("X-CSRFToken", $.cookie('csrftoken'));#}
+{#            },#}
+{#            success:function(data,textStatus){#}
+{#                var errors = data["errors"];#}
+{#                if(errors.length==0){#}
+{#                    location.replace("/account");#}
+{#                }#}
+{#                else{#}
+{#                    var html = "<div class=\"alert alert-danger\">"#}
+{#                    for (var key in errors){#}
+{#                        html += errors[key]+"<br/>";#}
+{#                    }#}
+{#                    html += "</div>";#}
+{#                    $("#change-account .panel-heading").after(html);#}
+{#                }#}
+{##}
+{#            },#}
+{#            error:function(XMLHttpRequest, textStatus, errorThrown){#}
+{#                alert(XMLHttpRequest.responseText);#}
+{#            }#}
+{#        })#}
+{#        return false;#}
+{#    });#}
+{##}
+{#    $("#change-account-button").click(function(){#}
+{#        $("#change-account .alert").remove();#}
+{#    });#}
+{#</script>#}

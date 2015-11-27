@@ -1,0 +1,57 @@
+{% extends "./blog/base.html" %}
+
+{%block main%}
+<div class="row">
+    <div id="vmaig-content" class="col-md-8 col-lg-9">
+        <!-- 警告框 -->
+{#        <div class="well alert hidden-xs fade in">#}
+{#            <button class="close" data-dismiss="alert" type="button">&times;</button>#}
+{#            您好,如果有任何问题可以加QQ：348878516。#}
+{#        </div>#}
+
+        <div class="visible-xs">
+            <div class="search">
+                <form class="form-inline clearfix" role="form" method="get" action="/search/">
+                    <input type="text" class="form-control" id="top-s" name="s">
+                    <button class="btn btn-vmaig">
+                        <span class="glyphicon glyphicon-search"></span>
+                    </button>
+                </form>
+            </div>
+        </div>
+        <!-- 首页文章列表 -->
+        <div id="home-post-list">
+            <!-- 首页轮播 -->
+            {% if carousel_page_list%}
+            {% include "./blog/include/carousel.html"%}
+            {% endif%}
+            {% if category_list %}
+                {% for category in category_list%}
+                    <h1 style="color:rgba(15, 15, 15, 0.98)">{{ category.name }}</h1>
+                    <div class="row">
+                        {% for post in category.article_set.all %}
+                            {% if  forloop.counter <= PAGE_NUM %}
+                                {% if post.status == 0 %}
+                                        <div class="col-md-3">
+                                            {% include "./blog/include/home_post.html"%}
+                                        </div>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+        </div>
+    </div>
+
+    <!-- 右边的widgets -->
+    <div id="vmaig-side" class="col-md-4 col-lg-3 hidden-xs">
+        {% include "./blog/widgets/tags_cloud.html"%}
+        {% include "./blog/widgets/search.html"%}
+        {% include "./blog/widgets/hotest_posts.html"%}
+        {% include "./vmaig_comments/latest_comments.html"%}
+        {% include "./blog/widgets/links.html"%}
+    </div>
+</div>
+{% endblock %}

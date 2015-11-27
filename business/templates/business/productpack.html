@@ -1,0 +1,259 @@
+{% extends "./blog/base.html" %}
+
+{% block main%}
+    {% if  PackinfoFlag != 0%}
+<div class="row">
+    <div id="vmaig-content" class="col-md-8 col-lg-9">
+        <div id="tool" class="well clearfix">
+            <div class="tags">
+                <div class="tag-list" style="float:left">
+                    {% for filmpack in filmpack_list%}
+                        {% if  forloop.counter == 1 %}
+                            <label class="active">
+                                {{filmpack.name}}
+                                <input type="radio" name="filmpack" value="{{filmpack.name}}" style="display:none" ></input>
+                                <div id="default_pack" hidden>{{filmpack.name}}</div>
+                            </label>
+                        {% else%}
+                            <label>
+                                {{filmpack.name}}
+                                <input type="radio" name="filmpack" value="{{filmpack.name}}" style="display:none" ></input>
+                            </label>
+                        {% endif %}
+                    {% endfor%}
+                </div>
+            </div>
+
+            <div class="article-content" >
+                <div style="margin-top:15pt">
+                    </br>
+                    <li>数量：<a id="packcont">{{ filmpackcount }}</a><a>部</a></li>
+
+                    <li>价格：<a id="packpri">{{ packpri }}</a>元</li>
+                    <li ><a id="packdesc">{{ packdesc|safe }}</a></li>
+                </div>
+            <div id="default-div">
+                {% if PackboughtFlag%}
+                    <div>
+                        <span class="label label-success pull-right">您已购买</span>
+                    </div>
+                {% else %}
+                    <div>
+                        <button type="button" class="btn btn-primary pull-right " data-toggle="modal" data-target="#myModal">
+                            立即购买
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+                <div id="unbought-div" style="display: none">
+                    <button type="button" class="btn btn-primary pull-right " data-toggle="modal" data-target="#myModal">
+                        立即购买
+                    </button>
+                </div>
+                <div id="bought-div" style="display: none">
+                    <span class="label label-success pull-right">您已购买</span>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="well">
+            <div id="all-post-list">
+                {% if article_list %}
+                {% with post_list=article_list %}
+                {% for post in post_list %} 
+                    {% include "./business/include/all_post.html" %}
+                {% endfor %}
+                {% endwith %}
+                {% endif %}
+            </div>
+            <div id="loading" style="height:100px;line-height:100px;text-align:center;display:none;">
+                <img src="http://vmaig.qiniudn.com/loading.gif" alt="">
+            </div>
+        </div>
+        <button id="all-post-more" type="button" class="btn btn-vmaig" value="all" style="width:100%">
+            加载更多
+            <span class="glyphicon glyphicon-menu-down"></span>
+        </button>
+
+    </div>
+
+    <div id="vmaig-side" class="col-md-4 col-lg-3 hidden-xs">
+        {% include "./blog/widgets/tags_cloud.html" %}
+        {% include "./blog/widgets/search.html" %}
+        {% include "./blog/widgets/hotest_posts.html" %}
+        {% include "./vmaig_comments/latest_comments.html" %}
+    </div>
+</div>
+{% endif %}
+        <!-- Modal -->
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" >
+            <div class="modal-dialog" role="document" style="top:200px">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">确认</h4>
+                    </div>
+                    <div class="modal-body">
+                        确定购买该产品包？
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" id="buyfilm_btn" onclick="buyfilm_btn()">确定购买</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <div id="useracnt" hidden>{{user.useracnt}}</div>
+    <div id="filmprival" hidden>{{ packpri }}</div>
+{#    <div id="packval" hidden></div>#}
+{% endblock %}
+
+{% block js%}
+<script language="javascript" type="text/javascript">
+
+    var start = 0;
+    var end = parseInt({{PAGE_NUM}});
+{#    alert('end'+end)#}
+function buyfilm_btn()
+{
+    val = $("input[name='filmpack']:checked").val()
+    if (typeof(val) == "undefined") {
+        val = $("#default_pack").text();
+    }
+    useracnt = $("#useracnt").text();
+    filmprival = $("#filmprival").text();
+    if($("#userid").text()=="None")
+    {
+        alert("您还没有登录，请先登录！");
+    }
+    else if(Number(useracnt)<Number(filmprival))
+    {
+        alert("账户余额不足，请及时充值！");
+    }
+    else{
+        userbought = Number(useracnt)-Number(filmprival);
+        $.ajax({
+            type:"POST",
+            data:{"packval":$("#default_pack").text(),"userbought":userbought,"funcval":"buypack", "val":val},
+            dataType:'json',
+            beforeSend:function(xhr){
+                xhr.setRequestHeader("X-CSRFToken", $.cookie('csrftoken'));
+            },
+            success:function(data,textStatus){
+                var errors = data["errors"];
+                if(errors.length==0){
+{#                    PackboughtFlag = data["PackboughtFlag"]#}
+                    location.reload();
+{#                    alert(PackboughtFlag)#}
+                }
+                else{
+                    var html = "<div class=\"alert alert-danger\">"
+                    for (var key in errors){
+                        html += errors[key]+"<br/>";
+                    }
+                    html += "</div>";
+                    $("#vmaig-content .underline").after(html);
+                }
+
+            },
+            error:function(XMLHttpRequest, textStatus, errorThrown){
+                alert(XMLHttpRequest.responseText);
+            }
+
+        });
+
+    }
+}
+
+    $("input[name='filmpack']").click(function(){
+        start = 0;
+        end = parseInt({{PAGE_NUM}});
+        $("input[name='filmpack']").parent().removeClass("active");
+        $("#all-post-more")[0].style.display = "none";
+        $("#loading")[0].style.display = "block";
+
+        $("#all-post-list").empty();
+        $(this).parent().addClass("active");
+        $("#all-post-more").val($(this).val());
+        $.ajax({
+            type:"POST",
+            data:{"val":$(this).attr("value"),"start":start,"end":end},
+
+            beforeSend:function(xhr){
+                xhr.setRequestHeader("X-CSRFToken", $.cookie('csrftoken'));  
+            },
+            success:function(data,textStatus){
+                $("#loading")[0].style.display = "none";
+                $('#all-post-list').append(data["html"]);
+                if(data["isend"])
+                {
+                    $("#all-post-more")[0].style.display = "none";
+                }else{
+                    $("#all-post-more")[0].style.display = "block";
+                }
+{#                从后台获取一些产品包的介绍数据#}
+                packcount = data["packcount"];
+                packdesc = data["packdesc"];
+                packpri = data["packpri"];
+                document.getElementById("packcont").innerHTML=packcount
+                document.getElementById("packdesc").innerHTML=packdesc
+                document.getElementById("packpri").innerHTML=packpri
+                document.getElementById("filmprival").innerHTML=packpri
+
+{#                alert(data["PackboughtFlag"]);#}
+
+                document.getElementById("default-div").style.display = "none";
+                if(data["PackboughtFlag"] == true){
+                    document.getElementById("unbought-div").style.display = "none";
+                    document.getElementById("bought-div").style.display = "block";
+                }else{
+
+                    document.getElementById("unbought-div").style.display = "block";
+                    document.getElementById("bought-div").style.display = "none";
+                }
+
+            },
+            error:function(XMLHttpRequest, textStatus, errorThrown){
+                alert(XMLHttpRequest.responseText);
+
+            }
+        });
+    });
+
+    $("#all-post-more").click(function(){
+        start = end;
+        end += 5;
+        val = $("input[name='filmpack']:checked").val()
+        if (typeof(val) == "undefined") {
+            val = $("#default_pack").text();
+        }
+        $("#loading")[0].style.display = "block";
+        $.ajax({
+            type:"POST",
+            url:"/productpack/",
+            data:{"val":val,"start":start,"end":end},
+            beforeSend:function(xhr){
+                xhr.setRequestHeader("X-CSRFToken", $.cookie('csrftoken'));
+            },
+            success:function(data,textStatus){
+                $("#loading")[0].style.display = "none";
+                $("#all-post-more")[0].style.display = "none";
+                $('#all-post-list').append(data["html"]);
+
+                if(data["isend"])
+                {
+                    $("#all-post-more")[0].style.display = "none";
+                }else{
+                    $("#all-post-more")[0].style.display = "block";
+                }
+
+            },
+            error:function(XMLHttpRequest, textStatus, errorThrown){
+                alert(XMLHttpRequest.responseText);
+            }
+        });
+    });
+
+</script>
+{% endblock%}

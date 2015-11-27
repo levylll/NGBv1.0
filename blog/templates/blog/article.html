@@ -1,0 +1,294 @@
+{% extends "./blog/base.html" %}
+
+{% block main %}
+<div class="row">
+    <div id="vmaig-content" class="col-md-8 col-lg-9">
+        <div id="article-page" class="well">
+            <ol class="breadcrumb">
+                <li><a href="/"><span class="glyphicon glyphicon-home"></span></a></li>
+                <li><a href="/category/{{article.category}}/">{{article.category}}</a></li>
+                <li class="hidden-xs"><a><span class="glyphicon glyphicon-calendar"></span> {{article.pub_time|date:"Y-m-d"}}</a></li>
+                <li><a>
+                    <span class="glyphicon glyphicon-eye-open"></span>
+                    {{article.view_times}}
+                </a></li>
+                <li class="pull-right"><a>
+                    <span class="glyphicon glyphicon-user"></span> {{article.author}}
+                </a></li>
+            </ol>
+
+            <div id="article">
+                <div class="article-title">
+                    <h1>{{article.title}}</h1>
+                </div>
+                <div class="article-tags">
+                    {% for tag in article.get_tags%}
+{#                    <a href="/tags/{{tag}}/">#}
+                        <span class="label label-vmaig-{{forloop.counter}} btn">{{tag}}</span>
+{#                    </a>#}
+                    {% endfor %}
+                </div>
+                <hr/>
+                <div class="article-content" >
+{#levytest#}
+                <div>
+{#                       <video class="dashjs-player" autoplay preload="none" controls="true">#}
+{#              <source src="http://dash.edgesuite.net/envivio/dashpr/clear/Manifest.mpd" type="application/dash+xml"/>#}
+{#       </video>#}
+                    <video class="dashjs-player" autoplay preload="none" controls="true" style="width: 400px">
+              <source src="http://127.0.0.1:8000/static/upload/transcode_root/dash/stream.mpd" type="application/dash+xml"/>
+       </video>
+                    <p>levytest-dash</p>
+                </div>
+{#levytest#}
+
+
+
+                {% if article.chgstatus == 0 %}
+                    {% if filmboughtflag%}
+                    <div class="videoUiWrapper">
+                        <video id="demo1"  width="490" height="360" controls="controls" canplay="false">
+{#                            <source src="/static/Video/test.mp4" type="video/ogg">#}
+                            <source src="/{{article.vod}}" type="video/mp4">
+{#                            <source src="/static/Video/test.mp4" type="video/mp4">#}
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                        {% else %}
+
+                        <div class="panel panel-default" style="width:180px; height: 230px">
+                            <figure class="thumbnail">
+                                <a href="/article/{{article.en_title}}.html">
+                                    <img src="/{{article.img}}"  alt="" style="width: 100%; height: 230px">
+                                </a>
+                            </figure>
+                        </div>
+                        <div>
+                            <a style="color:#F00; font-weight:bold">您还未购买！</a>
+{#                            <button type="button" class="btn btn-primary">购买：{{ filmprice }}元</button>#}
+                        <button type="button" class="btn btn-primary " data-toggle="modal" data-target="#myModal">
+                            购买：{{ filmprice }}元
+                        </button>
+                        </div>
+                    {% endif %}
+                    {% else %}
+                        <div class="panel panel-default" style="width:180px; height: 230px">
+                            <figure class="thumbnail">
+                                <a href="/article/{{article.en_title}}.html">
+                                    <img src="/{{article.img}}"  alt="" style="width: 100%; height: 230px">
+                                </a>
+                            </figure>
+                        </div>
+                        <div>
+                        {% if Admin_flag == 0 %}
+                            <p style="color:#F00; font-weight:bold">管理员点击转码进行转码操作！</p>
+                        <button type="button" class="btn btn-primary " data-toggle="modal" data-target="#myModal">
+                            转码
+                        </button>
+                            {% else %}
+                             <p style="color:#F00; font-weight:bold">该片已经发布，请联系或等待管理员转码！</p>
+                        {% endif %}
+                        </div>
+                    {% endif %}
+
+                            <div style="margin-top:15pt"><li>导演：{{ article.director }}</li>
+                            <li>演员：{{ article.actor }}</li>
+                            <li>题材：{{ article.theme }}</li>
+                            <li>国家：{{ article.country }}</li>
+                            <li>价格：{{ filmprice }}元</li>
+
+                                {% autoescape off%}
+                            <li>{{ article.content }}</li>
+                                {% endautoescape %}
+
+                            </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="well well-sm" style="height: 380px">
+        <h1 style="margin-bottom: 20px;margin-top: 5px">猜你喜欢</h1>
+            <div id="guess-list">
+                {% if guess_list %}
+                    {% with post_list=guess_list %}
+                        <div class="row">
+                            {% for post in post_list %}
+                                <div class="col-md-3">
+                                {% include "./blog/include/home_post.html" %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endwith %}
+                {% endif %}
+            </div>
+        </div>
+        <!--评论框 -->
+        {% include "./vmaig_comments/vmaig_comments.html"%}
+
+    <!-- Modal -->
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" >
+            <div class="modal-dialog" role="document" style="top:200px">
+                <div class="modal-content">
+
+                    {% if article.chgstatus == 0 %}
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel">购买确认</h4>
+                        </div>
+                        <div class="modal-body">
+                            影片《{{ article.title }}》，价格{{ filmprice }}元，确认购买？
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                            <button type="button" class="btn btn-primary" id="buyfilm_btn" onclick="buyfilm_btn()">确定购买</button>
+                        </div>
+                    {% else %}
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel">确认转码</h4>
+                        </div>
+                        <div class="modal-body">
+                            影片《{{ article.title }}》，转码可能需要等待一段时间，确认转码？
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                            <button type="button" class="btn btn-primary" id="chgstatus_btn" onclick="chgstatus_btn()">确定</button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="vmaig-side" class="col-md-4 col-lg-3 hidden-xs">
+
+        {% include "./blog/widgets/tags_cloud.html"%}
+        {% include "./blog/widgets/search.html"%}
+        {% include "./blog/widgets/hotest_posts.html"%}
+        {% include "./vmaig_comments/latest_comments.html"%}
+    </div>
+
+    <div id="filmval" hidden>{{article.en_title}}</div>
+    <div id="filmprival" hidden>{{filmprice}}</div>
+    <div id="useracnt" hidden>{{user.useracnt}}</div>
+    <div id="userid" hidden>{{user.id}}</div>
+</div>
+{% endblock %}
+
+{% block css%}
+<link type="text/css" rel="stylesheet" href="/static/syntaxhighlighter/styles/shCoreDefault.css"/>
+<style type="text/css">
+    #article {
+        font-size:14px;
+        color:#000;
+    }
+
+    blockquote {
+        font-size:14px;
+    }
+</style>
+
+<script language="javascript" type="text/javascript">
+    var userbought=0;
+    var filmprival='';
+    var useracnt='';
+
+function buyfilm_btn()
+{
+    useracnt = $("#useracnt").text();
+    filmprival = $("#filmprival").text();
+    if($("#userid").text()=="None")
+    {
+        alert("您还没有登录，请先登录！");
+    }
+    else if(Number(useracnt)<Number(filmprival))
+    {
+        alert("账户余额不足，请及时充值！");
+    }
+    else{
+        userbought = Number(useracnt)-Number(filmprival);
+        $.ajax({
+            type:"POST",
+{#            url:urlval,#}
+            data:{"filmval":$("#filmval").text(),"userbought":userbought, "filmprice":filmprival, "btn_flag":"buyfilm"},
+            dataType:'json',
+            beforeSend:function(xhr){
+                xhr.setRequestHeader("X-CSRFToken", $.cookie('csrftoken'));
+            },
+            success:function(data,textStatus){
+                var errors = data["errors"];
+                if(errors.length==0){
+                    location.reload();
+                }
+                else{
+                    var html = "<div class=\"alert alert-danger\">"
+                    for (var key in errors){
+                        html += errors[key]+"<br/>";
+                    }
+                    html += "</div>";
+                    $("#vmaig-content .underline").after(html);
+                }
+
+            },
+            error:function(XMLHttpRequest, textStatus, errorThrown){
+                alert(XMLHttpRequest.responseText);
+            }
+
+        });
+
+    }
+}
+
+    function chgstatus_btn()
+    {
+        $.ajax({
+            type:"POST",
+            {#            url:urlval,#}
+            data:{"filmval":$("#filmval").text(), "btn_flag":"chgstatus" },
+            dataType:'json',
+            beforeSend:function(xhr){
+                xhr.setRequestHeader("X-CSRFToken", $.cookie('csrftoken'));
+            },
+            success:function(data,textStatus){
+                var errors = data["errors"];
+                if(errors.length==0){
+                    location.reload();
+                }
+                else{
+                    var html = "<div class=\"alert alert-danger\">"
+                    for (var key in errors){
+                        html += errors[key]+"<br/>";
+                    }
+                    html += "</div>";
+                    $("#vmaig-content .underline").after(html);
+                }
+
+            },
+            error:function(XMLHttpRequest, textStatus, errorThrown){
+                alert(XMLHttpRequest.responseText);
+            }
+
+        });
+
+
+    }
+</script>
+
+{% endblock %}
+
+
+{% block js%}
+<script type="text/javascript" src="/static/syntaxhighlighter/scripts/shCore.js"></script>
+<script type="text/javascript" src="/static/syntaxhighlighter/scripts/shBrushCpp.js"></script>
+<script type="text/javascript" src="/static/syntaxhighlighter/scripts/shBrushJava.js"></script>
+<script type="text/javascript" src="/static/syntaxhighlighter/scripts/shBrushPython.js"></script>
+<script type="text/javascript" src="/static/syntaxhighlighter/scripts/shBrushXml.js"></script>
+<script type="text/javascript" src="/static/syntaxhighlighter/scripts/shBrushPowerShell.js"></script>
+<script type="text/javascript" src="/static/syntaxhighlighter/scripts/shBrushJScript.js"></script>
+<script type="text/javascript">SyntaxHighlighter.all();</script>
+{% endblock%}
+
+
+
+
+

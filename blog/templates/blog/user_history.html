@@ -1,0 +1,76 @@
+{% extends "./blog/base.html"%}
+
+{% block main%}
+<div style="height:80px;"></div>
+<div class="row">
+    <div class="col-md-2">
+        <a class="list-group-item">
+            <img src="{{user.img}}" alt="" width="40">
+            &nbsp;{{user.username}} 
+        </a>
+        <a href="/user/changetx"class="list-group-item">
+            修改头像
+            <span class="glyphicon glyphicon-chevron-right pull-right"></span>
+        </a>
+        <a href="/user/changepassword"class="list-group-item">
+            修改密码
+            <span class="glyphicon glyphicon-chevron-right pull-right"></span>
+        </a>
+        <a href="/user/account"class="list-group-item">
+            个人账户
+            <span class="glyphicon glyphicon-chevron-right pull-right"></span>
+        </a>
+        <a href="/user/charge"class="list-group-item">
+            充值
+            <span class="glyphicon glyphicon-chevron-right pull-right"></span>
+        </a>
+        <a href="/user_history"class="list-group-item active">
+            历史记录
+            <span class="glyphicon glyphicon-chevron-right pull-right"></span>
+        </a>
+    </div>
+    <div class="col-md-10">
+        <div class="col-md-6">
+        <table width="300" border="1" bordercolor="black" cellspacing="1" align="center">
+            <tr>
+                <td colspan="4" align="center">最近购买记录</td><!--colspan合并列单元格-->
+
+            </tr>
+            <tr align="center" style="font-weight: bold">
+                <td >产品名称</td>
+                <td>类型</td>
+                <td>价格</td>
+                <td>购买时间</td>
+            </tr>
+            {% for buy_history in buy_list %}
+            <tr align="center">
+                <td>{{ buy_history.name }}</td>
+                <td>{{ buy_history.buy_type }}</td>
+                <td align="right">{{ buy_history.price }}</td>
+                <td >{{ buy_history.create_time }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        </div>
+        <div class="col-md-6">
+        <table width="300" border="1" bordercolor="black" cellspacing="1" align="center">
+            <tr>
+                <td colspan="2" align="center">最近充值记录</td><!--colspan合并列单元格-->
+
+            </tr>
+            <tr align="center" style="font-weight: bold">
+                <td >充值金额</td>
+                <td>充值时间</td>
+            </tr>
+            {% for charge_history in charge_list %}
+            <tr align="center">
+                <td align="right">{{ charge_history.money }}</td>
+                <td >{{ charge_history.create_time }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        </div>
+{#        {%include "./vmaig_auth/account.html"%}#}
+    </div>
+</div>
+{%endblock%}
